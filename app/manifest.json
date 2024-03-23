@@ -1,0 +1,18 @@
+{
+  "short_name": "System Design",
+  "name": "Alex Genin | System Design",
+  "background_color": "#1D1D1D",
+  "theme_color": "#6A45FF",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

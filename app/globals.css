@@ -2,32 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+@layer components {
+  .button {
+    @apply block border-solid border-[1px] rounded-lg transition-all ease-in-out hover:border-violet hover:shadow-[0_0_15px_0_#623bff70] duration-300 bg-[length:100%_200%] bg-[linear-gradient(to_bottom,transparent_50%,#6A45FF_50%)];
   }
-}
-
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  .button:hover {
+    @apply bg-violet text-gray-light bg-[position:0_-100%];
   }
 }
