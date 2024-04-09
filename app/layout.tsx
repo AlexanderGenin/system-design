@@ -15,9 +15,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`relative px-6 bg-black text-gray-light ${quicksand.className} antialised`}
+        className={`bg-black text-gray-light ${quicksand.className} antialised`}
       >
-        <div className="container mx-auto lg:max-w-screen-md ">{children}</div>
+        {children}
       </body>
     </html>
   );

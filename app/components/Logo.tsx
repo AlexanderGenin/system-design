@@ -1,7 +1,7 @@
 import React from "react";
 import { montserrat } from "../ui/fonts";
 
-const Logo = () => {
+export const Logo = () => {
   return (
     <p className={`${montserrat.className}`}>
       alex
@@ -10,5 +10,3 @@ const Logo = () => {
     </p>
   );
 };
-
-export default Logo;
