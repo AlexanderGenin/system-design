@@ -3,10 +3,10 @@ import { montserrat } from "../ui/fonts";
 
 export const Logo = () => {
   return (
-    <p className={`${montserrat.className}`}>
+    <div className={`${montserrat.className} font-light`}>
       alex
       <span className="inline-block bg-violet rounded-full w-3 h-3 mx-3 align-middle" />
       genin
-    </p>
+    </div>
   );
 };

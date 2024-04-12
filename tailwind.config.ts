@@ -9,8 +9,9 @@ const config: Config = {
   theme: {
     colors: {
       black: "#191919",
-      violet: "#5345ff",
-      "gray-light": "#E5E5E5",
+      violet: "#4548ff",
+      "violet-transparent": "#4548ff12",
+      "gray-light": "#cccccc",
       "gray-dark": "#4F4F4F",
     },
     extend: {

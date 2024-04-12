@@ -8,7 +8,11 @@ interface LinkProps {
 
 export const Anchor: React.FC<LinkProps> = ({ children, href }) => {
   return (
-    <Link href={href} className="text-violet">
+    <Link
+      href={href}
+      target="_blank"
+      className="text-violet hover:text-[#4548ffce] transition-colors ease-in"
+    >
       {children}
     </Link>
   );

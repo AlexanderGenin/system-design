@@ -32,13 +32,9 @@ const Home = () => {
               >
                 Alexander Genin
               </h1>
-              <ul className="text-xl my-10 list-outside">
-                <li className="flex items-center list-disc-style before:text-4xl">
-                  Senior Software Engineer
-                </li>
-                <li className="flex items-center list-disc-style before:text-4xl">
-                  System Design Enthusiast
-                </li>
+              <ul className="text-xl my-10 list-inside list-disc marker:text-violet flex flex-col gap-2">
+                <li>Senior Software Engineer</li>
+                <li>System Design Enthusiast</li>
               </ul>
               <div className="flex justify-center md:justify-start">
                 <Link
@@ -49,7 +45,7 @@ const Home = () => {
                 </Link>
               </div>
             </div>
-            <div className="md:h-[310px] md:w-[310px] h-[270px] w-[270px] rounded-full bg-gradient-to-br from-[#4769f6] to-violet flex justify-center items-center shadow-[0_0_30px_0_#5345ff80]">
+            <div className="md:h-[310px] md:w-[310px] h-[270px] w-[270px] rounded-full bg-gradient-to-br from-[#4769f6] to-violet flex justify-center items-center shadow-[0_0_30px_0_#4548ff80]">
               <Image
                 alt="Alexander Genin"
                 src="/images/alexander-genin.webp"

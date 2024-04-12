@@ -4,7 +4,7 @@
 
 @layer components {
   .button {
-    @apply block border-solid border-[1px] rounded-lg transition-all ease-in-out hover:border-violet hover:shadow-[0_0_30px_0_#5345ff80] duration-300 bg-[length:100%_200%] bg-[linear-gradient(to_bottom,transparent_50%,#5345ff_50%)];
+    @apply block border-solid border-[1px] rounded-lg transition-all ease-in-out hover:border-violet hover:shadow-[0_0_30px_0_#4548ff80] duration-300 bg-[length:100%_200%] bg-[linear-gradient(to_bottom,transparent_50%,#4548ff_50%)];
   }
   .button-disabled {
     @apply block border-solid border-[1px] rounded-lg border-gray-dark text-gray-dark;
@@ -18,7 +18,48 @@
   .content-container {
     @apply container mx-auto lg:max-w-screen-md px-6 lg:px-0;
   }
-  .list-disc-style {
-    @apply before:content-['•'] before:text-violet before:mr-4;
-  }
+}
+
+strong {
+  @apply font-bold;
+}
+
+.mdx > p {
+  @apply content-container mb-4;
+}
+
+.mdx > ol {
+  @apply content-container list-decimal pl-8 mb-6;
+}
+
+.mdx ol ul {
+  @apply content-container list-disc pl-6;
+}
+
+.mdx > ul {
+  @apply content-container list-disc pl-8 mb-6;
+}
+
+.mdx ul ul {
+  @apply content-container list-[circle] pl-6;
+}
+
+.mdx li {
+  @apply my-2;
+}
+
+.mdx li p {
+  @apply my-4;
+}
+
+.mdx blockquote {
+  @apply content-container text-gray-dark my-6 border-l-2 border-l-gray-dark pl-4;
+}
+
+.mdx pre {
+  @apply content-container overflow-scroll p-4 rounded-lg my-4;
+}
+
+.mdx code {
+  @apply p-1 text-base rounded-md;
 }

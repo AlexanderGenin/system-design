@@ -6,17 +6,19 @@ export interface IllustrationProps {
   alt: string;
   width: number;
   height: number;
+  allowShrink?: boolean;
 }
 
 export const Illustration: React.FC<IllustrationProps> = (props) => {
   return (
-    <div className="content-container my-10 overflow-scroll">
+    <div className="container mx-auto my-10 overflow-scroll px-4 max-w-fit ">
       <Image
         priority
         src={props.src}
         height={props.height}
         width={props.width}
         alt={props.alt}
+        className={`${props.allowShrink ? "" : "min-w-max"} md:min-w-[auto]`}
       />
     </div>
   );

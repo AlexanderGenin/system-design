@@ -2,17 +2,20 @@ import React from "react";
 import { compileMDX } from "next-mdx-remote/rsc";
 import { readFile } from "node:fs/promises";
 import {
-  List,
   Anchor,
-  Paragraph,
   Heading,
   Logo,
   Illustration,
   IllustrationProps,
+  Callout,
+  CalloutProps,
   Background,
+  Social,
 } from "@components";
 import Link from "next/link";
 import { plusJakartaSans } from "@ui/fonts";
+import rehypePrettyCode from "rehype-pretty-code";
+import oneDarkPro from "../oneDarkPro.json";
 
 const Article = async ({ params }: { params: { slug: string } }) => {
   const filename = `./public/articles/${params.slug}/index.md`;
@@ -24,7 +27,7 @@ const Article = async ({ params }: { params: { slug: string } }) => {
       <div>
         <Background>
           <div className="flex flex-col min-h-screen">
-            <header className="content-container py-10 text-3xl">
+            <header className="content-container py-10 text-3xl relative z-10">
               <Link href={"/"}>
                 <Logo />
               </Link>
@@ -45,28 +48,46 @@ const Article = async ({ params }: { params: { slug: string } }) => {
     components: {
       h2: (props) => <Heading size={2}>{props.children}</Heading>,
       h3: (props) => <Heading size={3}>{props.children}</Heading>,
-      p: (props) => <Paragraph>{props.children}</Paragraph>,
+      h4: (props) => <Heading size={4}>{props.children}</Heading>,
       a: (props) => <Anchor href={props.href!}>{props.children}</Anchor>,
-      ul: (props) => <List type="unordered">{props.children}</List>,
-      ol: (props) => <List type="ordered">{props.children}</List>,
       Illustration: (props: IllustrationProps) => <Illustration {...props} />,
+      Callout: (props: CalloutProps) => <Callout {...props} />,
     },
-    options: { parseFrontmatter: true },
+    options: {
+      parseFrontmatter: true,
+      mdxOptions: {
+        rehypePlugins: [
+          [
+            rehypePrettyCode as any,
+            {
+              theme: oneDarkPro,
+              defaultLang: {
+                block: "plaintext",
+                inline: "plaintext",
+              },
+            },
+          ],
+        ],
+      },
+    },
   });
 
   return (
     <article className="flex flex-col min-h-screen">
-      <header className="h-[256px]">
-        <Background>
+      <Background>
+        <header className="min-h-[256px] relative z-10">
           <div className="content-container py-10 text-3xl">
             <Link href={"/"}>
               <Logo />
             </Link>
           </div>
           <Heading size={1}>{frontmatter.title}</Heading>
-        </Background>
-      </header>
-      <div className="grow mdx text-lg">{content}</div>
+        </header>
+      </Background>
+      <div className="grow mdx text-lg mt-6 leading-relaxed">{content}</div>
+      <footer className="content-container">
+        <Social />
+      </footer>
     </article>
   );
 };

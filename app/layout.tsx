@@ -1,12 +1,12 @@
-import { quicksand } from "@ui/fonts";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Alex Genin | System Design",
-  description: "Let's learn System Design together!",
+  title: "Alexander Genin | System Design",
+  description:
+    "I help you master System Design with comprehensive articles and high-quality illustrations",
 };
 
 export default function RootLayout({
@@ -16,9 +16,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`bg-black text-gray-light ${quicksand.className} antialised`}
-      >
+      <body className="bg-black text-gray-light font-light antialised">
         {children}
         <Analytics />
         <SpeedInsights />
