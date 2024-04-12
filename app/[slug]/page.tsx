@@ -16,12 +16,19 @@ import Link from "next/link";
 import { plusJakartaSans } from "@ui/fonts";
 import rehypePrettyCode from "rehype-pretty-code";
 import oneDarkPro from "../oneDarkPro.json";
+import path from "node:path";
 
 const Article = async ({ params }: { params: { slug: string } }) => {
-  const filename = `./public/articles/${params.slug}/index.md`;
+  const filePath = path.join(
+    process.cwd(),
+    "public",
+    "articles",
+    params.slug,
+    "index.md"
+  );
   let file;
   try {
-    file = await readFile(filename, "utf8");
+    file = await readFile(filePath, "utf8");
   } catch (e) {
     return (
       <div>

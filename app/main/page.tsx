@@ -36,7 +36,7 @@ const systems = [
     title: "Music Streaming",
     slug: "music-streaming",
     icon: "/images/icons/iconsax/music.svg",
-    disabled: true,
+    disabled: false,
   },
   {
     title: "Hotel Booking",
