@@ -1,6 +1,6 @@
 import React from "react";
 import { compileMDX } from "next-mdx-remote/rsc";
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import {
   Anchor,
   Heading,
@@ -18,18 +18,33 @@ import rehypePrettyCode from "rehype-pretty-code";
 import oneDarkPro from "../oneDarkPro.json";
 import path from "node:path";
 
-const Article = async ({ params }: { params: { slug: string } }) => {
+export async function generateStaticParams() {
+  const articles = await readdir(
+    path.join(process.cwd(), "public", "articles")
+  );
+  return articles.map((slug) => ({ slug }));
+}
+
+async function getArticle(slug: string) {
   const filePath = path.join(
     process.cwd(),
     "public",
     "articles",
-    params.slug,
+    slug,
     "index.md"
   );
-  let file;
+
   try {
-    file = await readFile(filePath, "utf8");
+    const file = await readFile(filePath, "utf8");
+    return file;
   } catch (e) {
+    return null;
+  }
+}
+
+const Article = async ({ params }: { params: { slug: string } }) => {
+  const file = await getArticle(params.slug);
+  if (!file)
     return (
       <div>
         <Background>
@@ -48,7 +63,6 @@ const Article = async ({ params }: { params: { slug: string } }) => {
         </Background>
       </div>
     );
-  }
 
   const { content, frontmatter } = await compileMDX<{ title: string }>({
     source: file,
