@@ -1,6 +1,10 @@
 import React from "react";
-import { compileMDX } from "next-mdx-remote/rsc";
+import path from "node:path";
 import { readFile, readdir } from "node:fs/promises";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { compileMDX } from "next-mdx-remote/rsc";
+import rehypePrettyCode from "rehype-pretty-code";
 import {
   Anchor,
   Heading,
@@ -12,11 +16,7 @@ import {
   Background,
   Social,
 } from "@components";
-import Link from "next/link";
-import { plusJakartaSans } from "@ui/fonts";
-import rehypePrettyCode from "rehype-pretty-code";
 import oneDarkPro from "../oneDarkPro.json";
-import path from "node:path";
 
 export async function generateStaticParams() {
   const articles = await readdir(
@@ -44,25 +44,7 @@ async function getArticle(slug: string) {
 
 const Article = async ({ params }: { params: { slug: string } }) => {
   const file = await getArticle(params.slug);
-  if (!file)
-    return (
-      <div>
-        <Background>
-          <div className="flex flex-col min-h-screen">
-            <header className="content-container py-10 text-3xl relative z-10">
-              <Link href={"/"}>
-                <Logo />
-              </Link>
-            </header>
-            <div
-              className={`${plusJakartaSans.className} grow text-5xl text-center font-extrabold flex justify-center items-center`}
-            >
-              <div className="-translate-y-[58px]">Not found... 🤔</div>
-            </div>
-          </div>
-        </Background>
-      </div>
-    );
+  if (!file) notFound();
 
   const { content, frontmatter } = await compileMDX<{ title: string }>({
     source: file,

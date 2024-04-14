@@ -1,5 +1,5 @@
 import React from "react";
-import { montserrat } from "../ui/fonts";
+import { montserrat } from "@ui/fonts";
 
 export const Logo = () => {
   return (
