@@ -7,6 +7,13 @@ export const metadata: Metadata = {
   title: "Alexander Genin | System Design",
   description:
     "I help you master System Design with comprehensive articles and high-quality illustrations",
+  metadataBase: new URL("https://alexgenin.com"),
+  alternates: {
+    canonical: "/",
+    languages: {
+      "en-US": "/en-US",
+    },
+  },
 };
 
 export default function RootLayout({

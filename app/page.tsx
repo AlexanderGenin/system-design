@@ -38,7 +38,7 @@ const Home = () => {
               </ul>
               <div className="flex justify-center md:justify-start">
                 <Link
-                  className="button border-violet border-2 text-xl w-[200px] text-center leading-[50px]"
+                  className="button border-violet border-2 text-xl w-[200px] text-center leading-[50px] font-semibold"
                   href="/main"
                 >
                   Let&apos;s design!
