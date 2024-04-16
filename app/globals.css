@@ -72,3 +72,7 @@ strong {
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+.mdx pre {
+  @apply hide-scrollbar;
+}
