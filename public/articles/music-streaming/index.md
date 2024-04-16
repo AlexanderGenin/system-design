@@ -6,9 +6,9 @@ title: Music Streaming Platform
 
 Today, we will be creating an architecture for a service like Spotify or Apple Music. I recommend visiting these apps to have a better understanding of their functionality. These services are extremely popular; for instance, last year alone, Spotify and Apple Music generated revenues of approximately $4.1 and $5.5 billion, with their user base exceeding 600 million and 100 million monthly active users, respectively. Here you can find more [detailed statistics](https://explodingtopics.com/blog/music-streaming-stats).
 
-There's a high chance you're using them too, or even listening to one of them right now while reading this article. So, I hope by the end of it, you will see what could be happening behind the scenes of your favorite music app.
+There's a high chance you're using them too, or even listening to one of them right now while reading this article. So, I hope by the end of it, you will see what could be happening behind the scenes of your favorite music app!
 
-The plan for the article is as close to a real-world scenario as possible. First, we gather the requirements from the business, both functional and non-functional. Secondly, based on our knowledge, we derive the technical estimations for our system, often referred to as "back of the envelope estimations". Thirdly, we outline the backbone of the system and API to support the functional requirements. Finally, we will gradually scale our system out to meet all the non-functional requirements and consider potential pitfalls and trade-offs. Now let’s dive right in!
+The plan for the article is as close to a real-world scenario as possible. First, we gather the requirements from the business, both _functional_ and _non-functional_. Secondly, based on our knowledge, we derive the technical estimations for our system, often referred to as "back of the envelope estimations". Thirdly, we outline the backbone of the system and API to support the functional requirements. Finally, we gradually scale our system out to meet all the non-functional requirements and consider potential pitfalls and trade-offs. Now let’s dive right in!
 
 <Illustration width="440" height="193" alt="Music Apps Logos" src="/articles/music-streaming/apps_logos.webp" allowShrink />
 
@@ -16,7 +16,7 @@ The plan for the article is as close to a real-world scenario as possible. First
 
 These are the requirements businesses will request. Stakeholders are generally not aware of all the intricacies of software architecture, so it is our responsibility to explain what is actually feasible and what is not.
 
-Music streaming services, of course, come with a lot of functionalities. We will limit our discussion to core features:
+Music streaming services, of course, come with a lot of functionality. We will limit our discussion to core features:
 
 - Music streaming
 - Music management (uploading, storage, removal)
@@ -28,10 +28,10 @@ When defining functional requirements, I highly recommend to discuss with the in
 
 Let’s list the topics to keep out of scope:
 
-- Authorization/authentication mechanisms
+- Authorization / authentication mechanisms
 - Additional features:
-  - Marking a song as favorite/adding to library
-  - Social activity like following/followers
+  - Marking a song as favorite / adding to library
+  - Social activity like following / followers
   - Playlists (both user-created and automatically generated)
   - Suggestion algorithm
 - Legal compliance
@@ -91,9 +91,9 @@ Now, I will provide estimations for a single user. During the actual design proc
 
 As we will see later audio files and other data (metadata, user data) should be stored separately so it makes sense to make estimations for them independently.
 
-It makes sense to calculate throughput for streaming data and requests per second (RPS) for other data since its transfers are relatively small.
+We calculate throughput for streaming data and requests per second (RPS) for other data since its transfers are relatively small.
 
-Our expectation is that the majority of users to just press play on a predefined playlist. We assume that each user will make about 30 additional requests per session for searches and playlist updates.
+Our expectation is that the majority of users will just press "play" on a predefined playlist. We assume that each user will make about 30 additional requests per session for searches and playlist updates.
 
 **Requests per second.** For audio metadata and user data we get one request for the next track each 5 minutes which is 180 / 5 = 36 requests per hour. Plus we add 30 / 3 = 10 additional requests each hour. The result is (36 + 10) / 3600 ≈ **0.01 RPS**
 
@@ -107,13 +107,11 @@ If you were unfamiliar with bitrates, you could deduce the appropriate number yo
 
 One might mistakenly base estimations on the maximum network bandwidth capacity, such as 10 or even 100 Mbps for a 4G network. However, this capacity is shared among all of a client's applications, and serving audio at maximum bandwidth would increase the load on our servers without significantly benefiting the client.
 
-The throughput for user data or audio metadata requests will be a lot smaller and we can neglect it.
-
 **Read/write ratio**. We assume that for 100 reads there will be 1 upload which gives us **1:100** ratio.
 
-**Writes per second:** From the above we get 0.01 \* 0.01 = **10<sup>-4</sup> RPS** for other data
+**Writes per second:** From the above we get 0.01 \* 0.01 RPS = **10<sup>-4</sup> RPS**
 
-**Write throughput**. Similarly 0.01 \* 200 Kbps = **4 Kbs** on average for streaming.
+**Write throughput**. Similarly we get 0.01 \* 200 Kbps = **2 Kbs** on average for streaming.
 
 **Storage**. At first glance it looks like one track requires 5 MB of blob storage and 1 KB of metadata. However the reality is more complex.
 
@@ -145,18 +143,18 @@ Note that I made a few strong assumptions and provided only a few rough numbers 
 
 ### Qualitative Requirements
 
-We've bypassed several NFRs without estimations for multiple reasons. Some can be inferred from others, such as _downtime_ being the inverse of _availability_. Others are not easily quantifiable. For example, measuring _manageability_ or _serviceability_ — metrics assessing the ease and speed with which a system can be repaired or maintained — is difficult. Even if you manage to quantify them, it might not significantly aid in the design process.
+We've bypassed several NFRs without estimations for multiple reasons. Some can be inferred from others, such as _downtime_ being the inverse of _availability_. Others are not easily quantifiable. For example, measuring _manageability_ or _serviceability_ is difficult. These metrics assessing the ease and speed with which a system can be repaired or maintained. Even if you manage to quantify them, it might not significantly aid in the design process.
 
-The same applies to _performance_, defined as the amount of work done by the system per second. This definition is somewhat broad, isn’t it? We can presume that _performance_ is roughly synonymous with _throughput_ and _latency_. Therefore, we will regard these requirements as qualitative metrics rather than quantitative.
+The same applies to _performance_, defined as the amount of work done by the system per second. This definition is somewhat broad, isn’t it? We can presume that _performance_ is roughly synonymous with _throughput_ and _latency_. The list could go on. Therefore, we will regard these and other requirements as _qualitative_ metrics rather than _quantitative_.
 
 Here are some qualitative requirements we will consider:
 
 - **Availability:** This one is fundamental. Our service must be accessible to users in various locations. This metric is typically outlined in a Service Level Agreement (SLA) as the percentage of time the system is available to users, e.g., 99.999%. However, the exact figure doesn't translate straightforwardly to the design decisions. Thus, we will aim for an ideally unachievable 100% availability for simplicity.
-- **Consistency:** Once a new track is uploaded, it should become available everywhere almost immediately. Achieving this is more complex than it appears. If you're familiar with the [CAP theorem](https://en.wikipedia.org/wiki/CAP_theorem), you'll understand that it's impossible to achieve both consistency and availability in a distributed system. We will address this complexity later. Here, we outline the business requirements, and it is our responsibility to inform the business if they are feasible or not.
+- **Consistency:** Once a new track is uploaded, it should become available everywhere almost immediately. Achieving this is more complex than it appears. If you're familiar with the [CAP theorem](https://en.wikipedia.org/wiki/CAP_theorem), you remember that it's impossible to achieve both consistency and availability in a distributed system. We will address this complexity later. Here, we outline the business requirements, and it is our responsibility to inform the business if they are feasible or not.
 - **Security:** We won't delve into security in depth here but will discuss general considerations. Our primary requirement is ensuring that data is accessible only to the authorized users it's intended for.
 - **Fault Tolerance:** The system's ability to continue operating properly in the event of failures in one or more components. It's crucial to identify potential _single points of failure_ and provide redundancy for them.
 - **Usability:** While it may seem trivial, we must periodically ensure our system isn’t over-engineered to the point of being problematic from user experience perspective.
-- **Reliability:** The probability that a system will produce correct outputs up to a given time. This is another aspect we should revisit periodically. For instance, our design could allow a user clicking the play button twice to start two overlapping audios. Or, we could mistakenly serve ads to premium clients. As an engineer you probably know that there are plenty of places where things can go wrong.
+- **Reliability:** It means the probability that a system will produce correct outputs up to a given time. This is another aspect we should revisit periodically. For instance, our design could allow a user clicking the play button twice to start two overlapping audios. Or, we could mistakenly serve ads to premium clients. As an engineer you probably know that there are plenty of places where things can go wrong.
 
 ## Minimum Viable Product (MVP)
 
@@ -190,7 +188,7 @@ Now let's discuss some of the entities we will focus on:
 - **Album:** A collection of tracks by an artist, with properties such as title, genre, release date, etc.
 - **Playlist:** A compilation of tracks generated by a user, platform administrators, or a suggestions algorithm. May have fields like title, and whether it is public or private, among others.
 
-I omitted supplementary columns like created_at, updated_at, and deleted_at, although they are implied by default for efficient retrieval and indexing.
+I omitted supplementary columns like "created_at", "updated_at", and "deleted_at", although they are implied by default for efficient retrieval and indexing.
 
 Of course, there may be more entities in a real app. It's your choice where to stop. I decided to list these ones to better illustrate our domain and to reason about the data storage type later.
 
@@ -198,7 +196,7 @@ With this in mind, let's choose the storage type for metadata. Generally, we hav
 
 - **Entities Hierarchy:** The structure of each entity is relatively flat and does not have deeply nested fields. The relationships are quite clear.
 - **Structure Changes:** The structure is well-defined and is not expected to change significantly. We don't have data flow from external systems which could change the data structure uncontrollably.
-- **Data Writes:** The read-to-write ratio indicates that writes are much less frequent. Each write usually involves a single entity, like audio being published/modified or a user registered/edited. These events do not occur as frequently as, for example, logs or analytics events.
+- **Data Writes:** The read-to-write ratio indicates that writes are much less frequent. Each write usually involves a single entity, like audio being published / modified or a user registered / edited. These events do not occur as frequently as, for example, logs or analytics events.
 - **Queries:** Our queries will rely on referential integrity and include joins to retrieve data. We will also benefit from database schema restrictions and [ACID](https://en.wikipedia.org/wiki/ACID) compliance (Atomicity, Consistency, Isolation, Durability), preventing records with the wrong structure or empty fields from entering the database and keeping the database in a consistent state.
 - **Data Locality:** Despite our entities being relatively straightforward, even if we end up extending them significantly with additional fields for some reason, we don’t expect to retrieve all these fields for most requests. Generally, we only need a small portion relevant to the current view or service.
 
@@ -212,7 +210,7 @@ This is our architecture so far:
 
 However, every choice comes with its trade-offs. By opting for a relational database, we also inherit all its challenges, such as difficult horizontal scaling and additional overhead for query processing to maintain ACID compliance.
 
-Here is the sketch of an Entity Relationship Diagram (ERD). Here's a good introduction on [how to interpret and draw your own ERDs](https://www.lucidchart.com/pages/er-diagrams). The User entity appears standalone as we've opted out of subscription or marking as favorite functionality. We also assume that one user can play only one track at each moment in time.
+Here is the sketch of our Entity Relationship Diagram (ERD) and this is a good introduction on [how to interpret and draw your own ERDs](https://www.lucidchart.com/pages/er-diagrams). The User entity appears standalone as we've opted out of subscription or marking as favorite functionality. We also assume that one user can play only one track at each moment in time.
 
 <Illustration width="532" height="461" alt="ERD" src="/articles/music-streaming/erd.webp" />
 
@@ -222,7 +220,7 @@ It is reasonable to treat artists separately from users as they will have a very
 
 Now, let's discuss data management, best explained through the backend API. We'll define the necessary endpoints to handle user actions such as uploading and streaming music, in accordance with the functional requirements. When in doubt, you can refer to the [freeCodeCamp article](https://www.freecodecamp.org/news/rest-api-best-practices-rest-endpoint-design-examples/) on API design best practices. Considering the importance of backward compatibility and potential API updates, I have also incorporated a versioning prefix.
 
-Entities like user, album, and artist are straightforward to create, read, update, and delete (CRUD), making the API for them simple. Therefore, I will skip them and instead focus on track management. Most operations involving tracks require several steps.
+Entities like user, album, and artist are straightforward to create, read, update, and delete (CRUD), making the API for them simple. Therefore, I will skip them and instead focus on tracks management. Most operations with tracks require several steps.
 
 The first step is obtaining a pre-signed URL. Pre-signed URLs provide time-limited access to a file directly in a designated bucket in object storage. Here's an example of a pre-signed URL for AWS:
 
@@ -328,21 +326,23 @@ Here are the estimations made from multiplying the previous numbers for a single
 
 #### Computing layer
 
-With these numbers, our current prototype will work just fine. A well-optimized single server instance can handle 100 RPS with ease. However, this server is a single point of failure. We need to keep our system available in case a server breaks for some reason. For that, we will keep two instances of the service on two machines. In case of server fault, we can have an auto-restart mechanism and some monitoring and alerting system integrated so that engineers are notified about the problems.
+With these numbers, our current prototype will work just fine. A well-optimized single server instance can handle 100 RPS with ease. However, this server is a single point of failure. We need to keep our system _available_ in case a server breaks for some reason. For that, we will keep two instances of the service on two machines. In case of server fault, we can have an auto-restart mechanism and some monitoring and alerting system integrated so that engineers are notified about the problems.
 
-One thing I intentionally skipped in the MVP section is music preprocessing. As we mentioned in the estimations part, audio files should be compressed to reduce their size for streaming. Different devices may support different audio formats, hence the need to store several lossy compression formats: AAC for iOS devices, MP3 for broad compatibility, OGG for certain browsers. This process is called encoding. On top of that, we need to serve each format in multiple bitrates suitable for HLS or MPEG-DASH. This process is called transcoding. So, we add two service workers called transcoder and encoder forming a processing pipeline to our design. The encoder service will also post new file metadata and its location in the object storage to the SQL database.
+One thing I intentionally skipped in the MVP section is music preprocessing. As we mentioned in the estimations part, audio files should be compressed to reduce their size for streaming. Different devices may support different audio formats, hence the need to store several lossy compression formats: AAC for iOS devices, MP3 for broad compatibility, OGG for certain browsers. This process is called _encoding_. On top of that, we need to serve each format in multiple bitrates suitable for HLS or MPEG-DASH. This process is called _transcoding_.
 
-In theory, we could have a live transcoder setup, but it would significantly increase the latency of our service and require substantial computing resources. Instead, we will opt to pay more for storage and process the music preemptively in the background, benefiting from faster start times for playback and minimized buffering.
+So, we add two service workers called transcoder and encoder forming a processing pipeline to our design. The encoder service will also post new file metadata and its location in the object storage to the SQL database. With these we address both increase _availability_ and decrease _latency_.
+
+In theory, we could have a live transcoder setup, but it would significantly increase the _latency_ of our service and require substantial computing resources. Instead, we will opt to pay more for storage and process the music preemptively in the background, benefiting from faster start times for playback and minimized buffering.
 
 #### Data layer
 
-We successfully reduced the load on our computing components, but what about storage? Both of our servers will end up constantly connecting to a single database instance. Establishing a new connection for each request is costly, so to reduce latency, a better approach is to use connection pooling.
+We successfully reduced the load on our computing components, but what about storage? Both of our servers will end up constantly connecting to a single database instance. Establishing a new connection for each request is costly, so to reduce _latency_, a better approach is to use connection pooling.
 
 Since the database and object storage are stateful, keeping a second instance for redundancy at this point seems to be relatively costly. At this scale, it is arguably easier to make backups every couple of hours compared to configuring read replicas, as it comes with new challenges that we will discuss later. The actual backup strategy will depend on the Recovery Point Objective (RPO) and Recovery Time Objective (RTO) that the business can tolerate.
 
 Although 100 connections for streaming with potential bursts may seem high for a single database, they will go to our object storage instead, which is well-optimized for it.
 
-To decrease latency, we should also think about properly indexing our database. Most probably, we will index tracks and albums based on their name and created_at fields for efficient searching. Other indexes may also be applied based on specific use cases of your app. However, remember that using indexes too much can negatively impact write performance and significantly affect query performance.
+To decrease _latency_, we should also think about properly indexing our database. Most probably, we will index tracks and albums based on their "name" and "created_at" fields for efficient searching. Other indexes may also be applied based on specific use cases of your app. However, remember that using indexes too much can negatively impact write performance and significantly affect query performance.
 
 #### Network layer
 
@@ -358,11 +358,11 @@ Lastly, for the sake of completeness, I will also add the Domain Name System (DN
 
 #### Security
 
-Before we delve further, let's briefly discuss security. Although security is not our primary focus, it is crucial to address it. We have already decided that the authentication and authorization logic will be abstracted as a service. It is good practice to include this in your design. We will represent it as a "black box" in our schema. It could be anything from an enterprise SAML SSO solution to a third-party provider built on OpenID and OAuth 2.0 protocols. Regardless of the actual implementation, we assume that after providing valid credentials, the user receives either a stateless token, like a JSON Web Token (JWT), or a stateful session ID.
+Before we delve further, let's briefly discuss _security_. Although _security_ is not our primary focus, it is crucial to address it. We have already decided that the authentication and authorization logic will be abstracted as a service. It is good practice to include this in our design. We will represent it as a "black box" in our schema. It could be anything from an enterprise SAML SSO solution to a third-party provider built on OpenID and OAuth 2.0 protocols. Regardless of the actual implementation, we assume that after providing valid credentials, the user receives either a stateless token, like a JSON Web Token (JWT), or a stateful session ID.
 
 This AuthN/AuthZ service will be operational within our cluster. The backend service will contact it for each request (perhaps through middleware) to validate the token and introspect it to obtain the user ID. The token will also enable us to provide Role-Based Access Control (RBAC) for the music, since every authenticated user can stream the music, but only artists can upload and delete tracks.
 
-Security itself is a vast topic, so I leave other intriguing aspects like OWASP Top 10, DoS protection, intrusion detection systems, poisoned pipeline execution, and many more for your own exploration.
+_Security_ itself is a vast topic, so I leave other intriguing aspects like OWASP Top 10, DoS protection, intrusion detection systems, poisoned pipeline execution, and many more for your own exploration.
 
 Let’s see what we have so far:
 
@@ -389,9 +389,9 @@ Starting with the data layer, although 2 GB of data is not excessive for a datab
 
 There are several strategies to mitigate this. First, we can separate profile and metadata into two databases, as they exhibit different access patterns. Music information is accessed far more frequently than user data. Additionally, reads occur 100 times more often than writes. Therefore, we can optimize the metadata database workload by introducing read replicas.
 
-But how do we maintain data consistency between them? According to the [CAP theorem](https://en.wikipedia.org/wiki/CAP_theorem), we have to sacrifice either consistency or availability to maintain system partition tolerance. Moreover, even when the system has a coherent network, the extension of the theorem, known as PACELC, dictates that we need to choose between consistency and latency.
+But how do we maintain data _consistency_ between them? According to the [CAP theorem](https://en.wikipedia.org/wiki/CAP_theorem), we have to sacrifice either _consistency_ or _availability_ to maintain system partition tolerance. Moreover, even when the system has a coherent network, the extension of the theorem, known as PACELC, dictates that we need to choose between _consistency_ and _latency_.
 
-In the context of a music streaming app, it seems reasonable to sacrifice consistency in both scenarios. In other words, we opt for eventual consistency for read replicas. This means that new writes may take some time to propagate to all replicas asynchronously. We can inform the user that updating profiles may take some time to reflect. Uploading music requires even more time as it needs to be processed by the service workers. This approach benefits availability. For fault tolerance, we can also add a standby replica where data is replicated synchronously. We can switch to it in case the primary write replica goes down.
+In the context of a music streaming app, it seems reasonable to sacrifice _consistency_ in both scenarios. In other words, we opt for eventual _consistency_ for read replicas. This means that new writes may take some time to propagate to all replicas asynchronously. We can inform the user that updating profiles may take some time to reflect. Uploading music requires even more time as it needs to be processed by the service workers. This approach benefits _availability_. For _fault tolerance_, we can also add a standby replica where data is replicated synchronously. We can switch to it in case the primary write replica goes down.
 
 Replication is also applicable to object storage but is usually managed behind the scenes. You can easily scale it horizontally by adding new machines if you need more storage.
 
@@ -433,7 +433,7 @@ To efficiently distribute traffic across microservices, we need an effective rou
 
 Additionally, we must ensure that a disaster in the zone where all this infrastructure is located will not bring the platform down, so we need at least one more data center situated far away from the other. To distribute the traffic between the data centers (DCs), we will continue to use a Network Load Balancer (NLB) with perhaps least connection algorithm.
 
-To make our system more resilient, we will add a special reverse proxy that will implement Network Address Translation (NAT) for outbound traffic, act as a firewall as a security precaution, and apply rate limiting on API endpoints to control the number of requests a user or IP address can make within a specific timeframe.
+To make our system more resilient, we will add a special reverse proxy that will implement Network Address Translation (NAT) for outbound traffic, act as a firewall as a _security_ precaution, and apply rate limiting on API endpoints to control the number of requests a user or IP address can make within a specific timeframe.
 
 Rate limits can depend on the types of operations. For example, actions like track uploads or playlist creations could have stricter limits compared to track playback or metadata retrieval. They can also be adjusted dynamically based on system load or user behavior. We can also encourage or enforce rate limiting on the client side using throttling and debouncing techniques.
 
@@ -443,11 +443,11 @@ We also need to consider asynchronous communication. Most likely, we will want t
 
 #### Caching
 
-There is one more problem that layers of microservices and additional network communications introduce, which is latency. All this infrastructure significantly increases the time for interservice communication, while our initial goal was to fit the response time within a 200ms latency budget. To address this issue, we will utilize caching at different layers, from the closest to the user to the closest to the data itself.
+There is one more problem that layers of microservices and additional network communications introduce, which is _latency_. All this infrastructure significantly increases the time for interservice communication, while our initial goal was to fit the response time within a 200ms _latency_ budget. To address this issue, we will utilize caching at different layers, from the closest to the user to the closest to the data itself.
 
 First of all, we can cache rarely changed and small-sized information like user data, playlists, thumbnails, and audio metadata information right on the user’s device.
 
-The next layer would be the Content Delivery Network (CDN) to cache audio files, metadata, images, and other public static content at edge locations closer to the users. This dramatically reduces latency and bandwidth costs by serving content from geographically distributed servers. Popular tracks or metadata can be pre-cached based on usage patterns and heatmaps, ensuring that frequently accessed data is readily available. Geo-routing (probably DNS-based) helps direct users to the nearest server or CDN edge location.
+The next layer would be the Content Delivery Network (CDN) to cache audio files, metadata, images, and other public static content at edge locations closer to the users. This dramatically reduces _latency_ and bandwidth costs by serving content from geographically distributed servers. Popular tracks or metadata can be pre-cached based on usage patterns and heatmaps, ensuring that frequently accessed data is readily available. Geo-routing (probably DNS-based) helps direct users to the nearest server or CDN edge location.
 
 The CDN can be configured to dynamically load new content from object storage. We can also preemptively load new releases from popular bands when high load is expected or pre-cache the top 500-1000 tracks based on our analytics data. In case of a cache miss we will use a common cache-aside (lazy loading) pattern to add data to the CDN after it was returned to the user from the database.
 
@@ -476,17 +476,17 @@ These numbers suggest that users may frequently access our system from different
 
 #### Data Layer
 
-The key change here is that the write load can no longer be handled by one database alone. This means that we have to create multiple write replicas. This brings the consistency problems to a whole new level. Before, we had only one write database as a single source of truth, and our goal was to make read replicas follow it reliably. With multiple write replicas, there is no longer a single source of truth, and we encounter problems involving conflict resolution and achieving consensus.
+The key change here is that the write load can no longer be handled by one database alone. This means that we have to create multiple write replicas. This brings the _consistency_ problems to a whole new level. Before, we had only one write database as a single source of truth, and our goal was to make read replicas follow it reliably. With multiple write replicas, there is no longer a single source of truth, and we encounter problems involving conflict resolution and achieving consensus.
 
 <Callout type="idea">
 Replication, consistency, and consensus in distributed systems are broad and complex matters. If you want to understand them better, I recommend reading "Designing Data-Intensive Applications" by Martin Kleppmann or "Database Internals" by Alex Petrov. You can also take a look at [Leslie Lamport’s papers](https://lamport.azurewebsites.net/pubs/pubs.html).
 </Callout>
 
-There are mainly two solutions to allow writes in different data centers: multi-leader and leaderless replication. Both approaches increase the system's availability and fault tolerance but provide very weak consistency guarantees, which is not a problem in our case as we can tolerate eventual consistency. We will not go in-depth on these topics here.
+There are mainly two solutions to allow writes in different data centers: multi-leader and leaderless replication. Both approaches increase the system's _availability_ and _fault tolerance_ but provide very weak _consistency_ guarantees, which is not a problem in our case as we can tolerate eventual _consistency_. We will not go in-depth on these topics here.
 
 Fortunately, there already exist solutions that allow us to deal with multiple write nodes. Although multi-leader replication is inherently supported in SQL databases, PostgreSQL BDR (Bi-Directional Replication) and Tungsten Replicator for MySQL have poorly implemented conflict detection techniques in many of them. The leaderless approach allows writes and reads from any node and has gained more popularity with its open-source implementations like Voldemort and especially Cassandra.
 
-Cassandra has built-in capabilities to manage data replication across multiple data centers, configured to use an appropriate replication strategy (`NetworkTopologyStrategy`) and consistency levels (`LOCAL_QUORUM`, `EACH_QUORUM`, etc.) to meet the application's consistency and latency requirements.
+Cassandra has built-in capabilities to manage data replication across multiple data centers, configured to use an appropriate replication strategy (`NetworkTopologyStrategy`) and _consistency_ levels (`LOCAL_QUORUM`, `EACH_QUORUM`, etc.) to meet the application's _consistency_ and _latency_ requirements.
 
 <Callout type="idea">
 Contrary to the generalization approach taken in most of the article, here we focus on a specific solution: Cassandra. It is open-source, well-tested, and widely adopted, with quite unique features at the time.
@@ -502,13 +502,13 @@ Using the User ID as the partition key for user data facilitates an even distrib
 
 Partitioning metadata by Artist ID or Track ID alone is not a good option, as it might lead to uneven distribution since some artists and tracks are more popular than others. Some nodes could become hotspots, especially if a new release by a popular artist just dropped. To overcome this, it is useful to add a composite key consisting of a partition key and a sharding key (random number % number of nodes).
 
-For object storage that contains our media files, support for cross-region replication is usually available out of the box. Similarly it implies high availability with a sacrifice in consistency.
+For object storage that contains our media files, support for cross-region replication is usually available out of the box. Similarly it implies high _availability_ with a sacrifice in _consistency_.
 
 #### Computing Layer
 
 Computing servers will benefit from vertical scaling by adding more power and horizontal scaling by deploying more containers in different zones and regions, while the microservices architecture will inherently remain the same.
 
-At this point, we should replace any stateful components, if we still have any, with stateless ones. This implies using self-contained tokens instead of sessions. It will also help us eliminate session affinity in case of application load balancers (ALB) and simplify load distribution. On top of that, it will ease the fault tolerance and recovery process, as we don’t have to worry about reconstructing lost session states.
+At this point, we should replace any stateful components, if we still have any, with stateless ones. This implies using self-contained tokens instead of sessions. It will also help us eliminate session affinity in case of application load balancers (ALB) and simplify load distribution. On top of that, it will ease the _fault tolerance_ and _recovery_ process, as we don’t have to worry about reconstructing lost session states.
 
 #### Network
 
@@ -516,9 +516,9 @@ Although our current task specification covers only a couple of services, in rea
 
 Just imagine how challenging it can be to establish and monitor all the interservice communication and traffic. It would be advantageous to abstract and unify this logic in the form of a sidecar for each service pod and manage it centrally. This is exactly the problem that a service mesh (like Istio or Linkerd) solves.
 
-If you are not familiar with the concept of a service mesh, here is a good [video introduction](https://youtu.be/16fgzklcF7Y). A service mesh injects a proxy sidecar for each pod and uses a control plane to gather information about inbound and outbound traffic. It helps to increase serviceability and manageability with features like tracing, monitoring, service discovery, load balancing between service instances, efficient troubleshooting, and optimization.
+If you are not familiar with the concept of a service mesh, here is a good [video introduction](https://youtu.be/16fgzklcF7Y). A service mesh injects a proxy sidecar for each pod and uses a control plane to gather information about inbound and outbound traffic. It helps to increase _serviceability_ and _manageability_ with features like tracing, monitoring, service discovery, load balancing between service instances, efficient troubleshooting, and optimization.
 
-It also enhances availability and resilience with setups for retries, failovers, circuit breakers, and fault injection. As a bonus, it also facilitates canary deployments and A/B testing by splitting traffic. Of course, adding a service mesh comes with the trade-off of additional complexity and potential vendor lock-in.
+It also enhances _availability_ and _resilience_ with setups for retries, failovers, circuit breakers, and fault injection. As a bonus, it also facilitates canary deployments and A/B testing by splitting traffic. Of course, adding a service mesh comes with the trade-off of additional complexity and potential vendor lock-in.
 
 <Callout type="example">
 Interesting fact: Google Cloud's Traffic Director — an xDS-based traffic control plane for service mesh — caused [Spotify’s global outage on March 8, 2022](https://engineering.atspotify.com/2022/03/incident-report-spotify-outage-on-march-8), for a few hours. So, adding redundancy to computing and data layers is not enough to make your system fault-tolerant, especially when you rely on an external provider’s infrastructure.
@@ -543,15 +543,21 @@ Estimations:
 
 Congratulations, we've finally reached the goal we set at the start. Interestingly, 1 billion active users would imply 10 billion registered users according to our estimations. At this point, every person in the world is registered, and some are registered twice 🙂. So, this scenario is mostly hypothetical speculation.
 
-For the most part, our previous architecture will fundamentally remain the same but with significantly more vertical and horizontal scaling and data centers all over the world. To cut costs and increase security, it can be arguably better to maintain our own servers and fine-tune them to increase availability and decrease latency, as cloud providers may not be capable of meeting all of our specific requirements.
+For the most part, our previous architecture will fundamentally remain the same but with significantly more vertical and horizontal scaling and data centers all over the world. To cut costs and increase _security_, it can be arguably better to maintain our own servers and fine-tune them to increase _availability_ and decrease _latency_, as cloud providers may not be capable of meeting all of our specific requirements.
 
 We will also need to establish ultra-low-latency communication between the data centers via a dedicated wired network. On top of that, optimizing network routing and agreements with Internet service providers for enhanced connectivity would be beneficial too.
 
 Most likely, we will be hiring PhDs to invent and develop new approaches to push the limits of existing architecture solutions.
 
-Let's take a look at our final architecture:
+This is our final architecture:
 
 <Illustration width="1390" height="631" alt="Music Streaming Platform System Design" src="/articles/music-streaming/final.webp" />
+
+Let's sum up the flow of the user's requests. First, the client contacts DNS to get the domain name. At this scale, we use DNS-based geo-routing to forward the request to the nearest region. The reverse proxy, acting as a firewall and NAT gateway, filters the traffic and translates the public IP address to the internal IP address. The round-robin load balancer distributes the traffic between data centers. The API Gateway receives the request and validates the token with the help of the identity service in the cluster. Then, the API Gateway sends the request to the corresponding microservice based on the HTTP route. Each microservice checks if data is available in the cache and polls the No-SQL database otherwise.
+
+Upload requests end up creating a new audio blob in the object storage using an issued pre-signed URL and creating a new audio metadata entry in the DB. It also triggers the transcoding / encoding pipeline to prepare optimized audio files. Update and delete requests behave similarly. Stream requests result in streaming from the CDN using a pre-signed URL or from S3 directly if the entry is not found on the CDN. CDN and other caching layers use LFU or LRU strategies to continuously remove rarely accessed data.
+
+Object storage data is replicated across regions. Database updates are continuously synchronized between data centers based on a leaderless architecture. The service mesh helps to monitor the traffic between microservices. The event-streaming service receives various events across the cluster and allows other subscribers to act upon them.
 
 <Callout type="example">
 I would like to give a shout-out to Spotify for their openness about engineering decisions and valuable contributions to the open-source community, like [Backstage](https://backstage.io/) and [Luigi](https://github.com/spotify/luigi). You can check out their excellent [Spotify Engineering R&D blog](https://engineering.atspotify.com/), where they share high-quality insights about various aspects of engineering and product solutions.
@@ -591,7 +597,7 @@ Here are some more exciting challenges that you might think about or investigate
 
   I propose that we keep a counter of tracks a user has listened to, and each time the counter hits a predefined value, reset it and load an ad before the next track.
 
-- **Should we use cloud-Native or on-premises solutions?**
+- **Should we use cloud-native or on-premises solutions?**
 
   The system we described is not bound to either cloud or on-premises dedicated infrastructure. You may want to evaluate the costs and benefits of each approach.
 
