@@ -11,7 +11,7 @@ export interface IllustrationProps {
 
 export const Illustration: React.FC<IllustrationProps> = (props) => {
   return (
-    <div className="container mx-auto my-10 overflow-scroll px-4 max-w-fit ">
+    <div className="container hide-scrollbar overflow-scroll mx-auto my-10 px-4 max-w-fit ">
       <Image
         priority
         src={props.src}
